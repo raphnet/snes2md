@@ -52,26 +52,70 @@ static void hwinit(void)
 
 }
 
+static volatile uint8_t mddata[8];
+
 void fastint(void) __attribute__((naked)) __attribute__((section(".boot")));
 
 void fastint(void)
 {
+#if 0
 	asm volatile(
 		"	nop\nnop\n					\n" // VECTOR 1 : RESET
 
-		// Only vector 2 (INT0) is used. Code start right here to save cycles (no jump)
+		"	in r16, 0x23 	; OCR2		\n"
+		"	out 0x15, r16	; PORTC		\n"
+		
+		"	in r16, 0x3F	; SREG		\n"
+
+		"	push r16					\n"
+		"	push r30					\n"
+		"	push r31					\n"
+
+
+
+		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
+		"	sbis 0x10, 2	; PIND2		\n"
+		"	in r16, 0x09	; UBRLL		\n"
+		"	in r16, 0x1D 	; EEDR		\n"
+		"	reti						\n"
+	:: "z"(mddata));
+#endif
+
+#if 1
+asm volatile(
+		"	nop\nnop\n					\n" // VECTOR 1 : RESET
+
+		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
+	
+		"	in r16, 0x26 	; ICR1L		\n" 
+		"	out 0x15, r16	; PORTC		\n"
+
+		// Now, let's prepare for the next transition...	
+		
+		"	in r16, 0x09	; UBRLL		\n"
+		"	sbis 0x10, 2	; PIND2		\n"
+		"	in r16, 0x23 	; OCR2		\n"
+		"	out 0x26, r16	; ICR1L		\n"
+		
+		"	in r16, 0x1D 	; EEDR		\n"
+		"	reti						\n"
+	::);
+#endif
+
+#if 0
+	asm volatile(
+		"	nop\nnop\n					\n" // VECTOR 1 : RESET
 		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
 		"	in r16, 0x23 	; OCR2		\n"
 		"	sbis 0x10, 2	; PIND2		\n"
 		"	in r16, 0x09	; UBRLL		\n"
 		"	out 0x15, r16	; PORTC		\n"
-		"	in r16, 0x1D 	; EEDR		\n" // 1 cycle
+		"	in r16, 0x1D 	; EEDR		\n"
 		"	reti						\n"
 	::);
-
+#endif
 }
 
-static volatile uint8_t S0_PC, S1_PC, Sx_PC;
 
 EMPTY_INTERRUPT(INT0_vect);
 
@@ -145,14 +189,8 @@ int main(void)
 			map++;
 		}
 
-#if 1	
-		UBRRL = S0_PC = next_S0_PC ^ 0xff;
-		OCR2 = S1_PC = next_S1_PC ^ 0xff;
-#else
-		OCR2 = S0_PC = next_S0_PC ^ 0xff;
-		UBRRL = S1_PC = next_S1_PC ^ 0xff;
-#endif
-		// = next_Sx_PC ^ 0xff;
+		UBRRL = mddata[0] = next_S0_PC ^ 0xff;
+		OCR2 = mddata[1] = next_S1_PC ^ 0xff;
 
 		_delay_ms(4);
 	}
