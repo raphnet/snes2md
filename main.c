@@ -81,23 +81,22 @@ void fastint(void)
 	:: "z"(mddata));
 #endif
 
+
 #if 1
 asm volatile(
 		"	nop\nnop\n					\n" // VECTOR 1 : RESET
-
-		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
 	
-		"	in r16, 0x26 	; ICR1L		\n" 
-		"	out 0x15, r16	; PORTC		\n"
+		"	in __zero_reg__, 0x26 	; ICR1L		\n" 
+		"	out 0x15, __zero_reg__	; PORTC		\n"
 
 		// Now, let's prepare for the next transition...	
 		
-		"	in r16, 0x09	; UBRLL		\n"
+		"	in __zero_reg__, 0x09	; UBRLL		\n"
 		"	sbis 0x10, 2	; PIND2		\n"
-		"	in r16, 0x23 	; OCR2		\n"
-		"	out 0x26, r16	; ICR1L		\n"
-		
-		"	in r16, 0x1D 	; EEDR		\n"
+		"	in __zero_reg__, 0x23 	; OCR2		\n"
+		"	out 0x26, __zero_reg__	; ICR1L		\n"
+	
+		"	clr __zero_reg__			\n"	
 		"	reti						\n"
 	::);
 #endif
