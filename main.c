@@ -83,7 +83,7 @@ asm volatile(
 		// manage pointer
 		"	lds r16, dat_pos			\n"	// previous index (now on PORT)
 		"	inc r16						\n" // next index
-		"	andi r16, 0x07				\n"
+		"	andi r16, 0x07				\n" // 0-7
 		"	sts dat_pos, r16			\n" // save next index
 
 		"	ldi r30, lo8(mddata)		\n" // get mdata base adress into Z
@@ -182,20 +182,19 @@ int main(void)
 
 		polled = 0;
 		while (!polled) { }
-
 		_delay_ms(1.5);
-		for (i=0; i<sizeof(next_data); i++) {
-			mddata[i] = next_data[i] ^ 0xff;
-		}
+
+		// Timeout from the 6button mode
+		memcpy((void*)mddata, next_data, 8);
 		if (PIND & (1<<PIND2)) {
 			dat_pos = 1;
 			PORTC = mddata[0];
 		} else {
 			dat_pos = 0;
-			PORTC = mddata[1];
 		}
-		ICR1L = mddata[dat_pos];
 
+		ICR1L = mddata[dat_pos];
+		
 		snespad->update();
 		snespad->getReport(&last_data);
 
@@ -218,9 +217,13 @@ int main(void)
 		next_data[2] = sel_high_dat;
 		next_data[3] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
 		next_data[4] = sel_high_dat;
-		next_data[5] = sel_low_dat | 0x3f; // FORCE UP/Dn/lef/right to 0 for detection.
+		next_data[5] = sel_low_dat | 0x3c; // FORCE UP/Dn/lef/right to 0 for detection.
 		next_data[6] = sel_x_dat;
 		next_data[7] = sel_high_dat & 0x03; // Keep Up/Dn/Left/Right high for detection.
+
+		for (i=0; i<8; i++) {
+			next_data[i] ^= 0xff;
+		}
 	}
 
 	return 0;
