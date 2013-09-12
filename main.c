@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <string.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
@@ -52,37 +53,14 @@ static void hwinit(void)
 
 }
 
-static volatile uint8_t mddata[8];
+volatile uint8_t mddata[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff };
+volatile uint8_t dat_pos;
+volatile uint8_t polled;
 
 void fastint(void) __attribute__((naked)) __attribute__((section(".boot")));
 
 void fastint(void)
 {
-#if 0
-	asm volatile(
-		"	nop\nnop\n					\n" // VECTOR 1 : RESET
-
-		"	in r16, 0x23 	; OCR2		\n"
-		"	out 0x15, r16	; PORTC		\n"
-		
-		"	in r16, 0x3F	; SREG		\n"
-
-		"	push r16					\n"
-		"	push r30					\n"
-		"	push r31					\n"
-
-
-
-		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
-		"	sbis 0x10, 2	; PIND2		\n"
-		"	in r16, 0x09	; UBRLL		\n"
-		"	in r16, 0x1D 	; EEDR		\n"
-		"	reti						\n"
-	:: "z"(mddata));
-#endif
-
-
-#if 1
 asm volatile(
 		"	nop\nnop\n					\n" // VECTOR 1 : RESET
 	
@@ -90,29 +68,44 @@ asm volatile(
 		"	out 0x15, __zero_reg__	; PORTC		\n"
 
 		// Now, let's prepare for the next transition...	
-		
-		"	in __zero_reg__, 0x09	; UBRLL		\n"
-		"	sbis 0x10, 2	; PIND2		\n"
-		"	in __zero_reg__, 0x23 	; OCR2		\n"
-		"	out 0x26, __zero_reg__	; ICR1L		\n"
-	
-		"	clr __zero_reg__			\n"	
-		"	reti						\n"
-	::);
-#endif
 
-#if 0
-	asm volatile(
-		"	nop\nnop\n					\n" // VECTOR 1 : RESET
-		"	out 0x1D, r16 ; EEDR		\n" // 1 cycle
-		"	in r16, 0x23 	; OCR2		\n"
-		"	sbis 0x10, 2	; PIND2		\n"
-		"	in r16, 0x09	; UBRLL		\n"
-		"	out 0x15, r16	; PORTC		\n"
-		"	in r16, 0x1D 	; EEDR		\n"
+		"	push r16					\n"
+		"	push r30					\n"
+		"	push r31					\n"
+
+		"	in r16, __SREG__			\n"
+		"	push r16					\n"
+		
+		// notify main loop
+		"	ldi r16, 1					\n"
+		"	sts polled, r16				\n"
+
+		// manage pointer
+		"	lds r16, dat_pos			\n"	// previous index (now on PORT)
+		"	inc r16						\n" // next index
+		"	andi r16, 0x07				\n"
+		"	sts dat_pos, r16			\n" // save next index
+
+		"	ldi r30, lo8(mddata)		\n" // get mdata base adress into Z
+		"	ldi r31, hi8(mddata)		\n"
+	
+		"	add r30, r16				\n" // Add current index to Z
+		"	ldi r16, 0					\n"
+		"	adc r31, r16				\n"
+		
+		"	ld r16, Z					\n"
+		"	out 0x26, r16			;	 ICR1L		\n" // next value
+
+		"	clr __zero_reg__			\n" // clear zero reg
+
+		"	pop r16						\n"
+		"	out __SREG__, r16			\n"
+		
+		"	pop r31						\n" // r31
+		"	pop r30						\n" // r30
+		"	pop r16						\n" // r16
 		"	reti						\n"
 	::);
-#endif
 }
 
 
@@ -120,32 +113,45 @@ EMPTY_INTERRUPT(INT0_vect);
 
 struct snes_md_map {
 	uint16_t snes_btn;
-	uint8_t s0,s1,sx;
+
+	uint8_t s[3]; // [0] SELECT LOW STATE, [1] SELECT HIGH STATE, [2] 3RD HIGH STATE
 };
 
+
+#define GEN_BTN_A			{0x02, 0x00, 0x00 }
+#define GEN_BTN_B			{0x00, 0x02, 0x00 }
+#define GEN_BTN_C			{0x00, 0x01, 0x00 }
+#define GEN_BTN_X			{0x00, 0x00, 0x08 }
+#define GEN_BTN_Y			{0x00, 0x00, 0x10 }
+#define GEN_BTN_Z			{0x00, 0x00, 0x20 }
+#define GEN_BTN_START		{0x01, 0x00, 0x00 }
+#define GEN_BTN_MODE		{0x00, 0x00, 0x04 }
+#define GEN_BTN_DPAD_UP		{0x20, 0x20, 0x00 }
+#define GEN_BTN_DPAD_DOWN	{0x10, 0x10, 0x00 }
+#define GEN_BTN_DPAD_LEFT	{0x00, 0x08, 0x00 }
+#define GEN_BTN_DPAD_RIGHT	{0x00, 0x04, 0x00 }
+
 struct snes_md_map default_map[] = {
-	// SNES       		S0    S1    SX
-	{ SNES_BTN_A,		0x02, 0x00, 0x00 },
-	{ SNES_BTN_B, 		0x00, 0x02, 0x00 },
-	{ SNES_BTN_X,		0x00, 0x01, 0x00 },
-	{ SNES_BTN_Y,		0x00, 0x00, 0x08 },
-	{ SNES_BTN_L,		0x00, 0x00, 0x10 },
-	{ SNES_BTN_R,		0x00, 0x00, 0x20 },
-	{ SNES_BTN_START,	0x01, 0x00, 0x00 },
-	{ SNES_BTN_SELECT,	0x00, 0x00, 0x04 },	
-	{ SNES_BTN_DPAD_UP,	0x20, 0x20, 0x00 },
-	{ SNES_BTN_DPAD_DOWN,0x10,0x10, 0x00 },
-	{ SNES_BTN_DPAD_LEFT,0x00,0x08, 0x00 },
-	{ SNES_BTN_DPAD_RIGHT,0x00, 0x04,0x00 },
-	{ 0xffff,			0x0c, 0x00, 0x00 }, // always 0 bits
+
+	{ SNES_BTN_A,			GEN_BTN_A },
+	{ SNES_BTN_B, 			GEN_BTN_B },
+	{ SNES_BTN_X,			GEN_BTN_C },
+	{ SNES_BTN_Y,			GEN_BTN_X },
+	{ SNES_BTN_L,			GEN_BTN_Y },
+	{ SNES_BTN_R,			GEN_BTN_Z },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_RIGHT },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
 int main(void)
 {
+	uint8_t next_data[8];
 	Gamepad *snespad;
-	gamepad_data last_data;
-	uint8_t next_S0_PC, next_S1_PC, next_Sx_PC;
 
 	hwinit();
 
@@ -161,6 +167,7 @@ int main(void)
 
 	//
 	MCUCR |= (1<<ISC00); // Any change generates an interrupt
+	MCUCR &= ~(1<<ISC01);
 	GICR |= (1<<INT0);
 
 
@@ -169,29 +176,51 @@ int main(void)
 	while(1)
 	{
 		struct snes_md_map *map;
+		uint8_t sel_low_dat, sel_high_dat, sel_x_dat;
+		gamepad_data last_data;
+		int i;
+
+		polled = 0;
+		while (!polled) { }
+
+		_delay_ms(1.5);
+		for (i=0; i<sizeof(next_data); i++) {
+			mddata[i] = next_data[i] ^ 0xff;
+		}
+		if (PIND & (1<<PIND2)) {
+			dat_pos = 1;
+			PORTC = mddata[0];
+		} else {
+			dat_pos = 0;
+			PORTC = mddata[1];
+		}
+		ICR1L = mddata[dat_pos];
 
 		snespad->update();
 		snespad->getReport(&last_data);
-		
-		next_S0_PC = next_S1_PC = next_Sx_PC = 0;
 
+		sel_low_dat = 0;
+		sel_high_dat = 0;
+		sel_x_dat = 0;
 		map = default_map;
-
 		while (map->snes_btn) {
-			if (last_data.snes.buttons & map->snes_btn || 
-				map->snes_btn==0xffff)
+			if ((last_data.snes.buttons & map->snes_btn))
 			{
-				next_S0_PC |= map->s0;
-				next_S1_PC |= map->s1;
-				next_Sx_PC |= map->sx;
+				sel_low_dat |= map->s[0];
+				sel_high_dat |= map->s[1];
+				sel_x_dat |= map->s[2];
 			}
 			map++;
 		}
-
-		UBRRL = mddata[0] = next_S0_PC ^ 0xff;
-		OCR2 = mddata[1] = next_S1_PC ^ 0xff;
-
-		_delay_ms(4);
+	
+		next_data[0] = sel_high_dat;	
+		next_data[1] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
+		next_data[2] = sel_high_dat;
+		next_data[3] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
+		next_data[4] = sel_high_dat;
+		next_data[5] = sel_low_dat | 0x3f; // FORCE UP/Dn/lef/right to 0 for detection.
+		next_data[6] = sel_x_dat;
+		next_data[7] = sel_high_dat & 0x03; // Keep Up/Dn/Left/Right high for detection.
 	}
 
 	return 0;
