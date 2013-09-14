@@ -1,0 +1,25 @@
+
+-- Genesis/Megadrive controller wiring --
+
+DB9 Pin   Signal name    AVR pin name   
+-------------------------------------
+1         UP/UP/Z        PC5
+2         DN/DN/Y        PC4
+3         0/LF/X         PC3
+4         0/RT/          PC2
+5         VCC            VCC
+6         A/B            PC1
+7         SELECT         PD2 (INT0)
+8         GND            GND
+9         START/C        PC0
+
+-- SNES Controller wiring --
+
+Signal name        AVR pin name
+-------------------------------
+VCC                VCC
+GND                GND
+CLOCK              PB5
+DATA               PB4
+LATCH              PB3
+

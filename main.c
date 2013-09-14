@@ -56,6 +56,7 @@ static void hwinit(void)
 volatile uint8_t mddata[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff };
 volatile uint8_t dat_pos;
 volatile uint8_t polled;
+uint8_t zero = 0;
 
 void fastint(void) __attribute__((naked)) __attribute__((section(".boot")));
 
@@ -95,8 +96,9 @@ asm volatile(
 		
 		"	ld r16, Z					\n"
 		"	out 0x26, r16			;	 ICR1L		\n" // next value
-
-		"	clr __zero_reg__			\n" // clear zero reg
+		
+		"	lds __zero_reg__, zero		\n" // clear zero reg
+//		"	clr __zero_reg__			\n" // clear zero reg
 
 		"	pop r16						\n"
 		"	out __SREG__, r16			\n"
@@ -131,6 +133,7 @@ struct snes_md_map {
 #define GEN_BTN_DPAD_LEFT	{0x00, 0x08, 0x00 }
 #define GEN_BTN_DPAD_RIGHT	{0x00, 0x04, 0x00 }
 
+
 struct snes_md_map default_map[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_A },
@@ -148,14 +151,77 @@ struct snes_md_map default_map[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
+struct snes_md_map alt_map1[] = {
+
+	{ SNES_BTN_A,			GEN_BTN_B },
+	{ SNES_BTN_B, 			GEN_BTN_A },
+	{ SNES_BTN_X,			GEN_BTN_X },
+	{ SNES_BTN_Y,			GEN_BTN_C },
+	{ SNES_BTN_L,			GEN_BTN_Y },
+	{ SNES_BTN_R,			GEN_BTN_Z },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_RIGHT },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+struct snes_md_map alt_map2[] = {
+
+	{ SNES_BTN_A,			GEN_BTN_C },
+	{ SNES_BTN_B, 			GEN_BTN_B },
+	{ SNES_BTN_X,			GEN_BTN_Y },
+	{ SNES_BTN_Y,			GEN_BTN_A },
+	{ SNES_BTN_L,			GEN_BTN_X },
+	{ SNES_BTN_R,			GEN_BTN_Z },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_RIGHT },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+#define MAP_DEFAULT			0
+#define MAP_ALT1			1
+#define MAP_ALT2			2
+struct snes_md_map *maps[3] = {
+	default_map,
+	alt_map1,
+	alt_map2,
+};
+
 int main(void)
 {
+	gamepad_data last_data;
 	uint8_t next_data[8];
 	Gamepad *snespad;
+	uint8_t cur_map_id;
 
 	hwinit();
 
+	_delay_ms(50);
+
 	snespad = snesGetGamepad();
+	snespad->update();
+	snespad->getReport(&last_data);
+
+	switch (last_data.snes.buttons)
+	{
+		default:
+		case SNES_BTN_A:
+			cur_map_id = MAP_DEFAULT;	
+			break;
+		case SNES_BTN_B:
+			cur_map_id = MAP_ALT1;	
+			break;
+		case SNES_BTN_Y:
+			cur_map_id = MAP_ALT2;	
+			break;
+	}
 
 	// setup SELECT external interrupt
 	//
@@ -177,7 +243,6 @@ int main(void)
 	{
 		struct snes_md_map *map;
 		uint8_t sel_low_dat, sel_high_dat, sel_x_dat;
-		gamepad_data last_data;
 		int i;
 
 		polled = 0;
@@ -201,7 +266,8 @@ int main(void)
 		sel_low_dat = 0;
 		sel_high_dat = 0;
 		sel_x_dat = 0;
-		map = default_map;
+
+		map = maps[cur_map_id];
 		while (map->snes_btn) {
 			if ((last_data.snes.buttons & map->snes_btn))
 			{
