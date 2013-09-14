@@ -56,7 +56,6 @@ static void hwinit(void)
 volatile uint8_t mddata[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff };
 volatile uint8_t dat_pos;
 volatile uint8_t polled;
-uint8_t zero = 0;
 
 void fastint(void) __attribute__((naked)) __attribute__((section(".boot")));
 
@@ -97,8 +96,7 @@ asm volatile(
 		"	ld r16, Z					\n"
 		"	out 0x26, r16			;	 ICR1L		\n" // next value
 		
-		"	lds __zero_reg__, zero		\n" // clear zero reg
-//		"	clr __zero_reg__			\n" // clear zero reg
+		"	clr __zero_reg__			\n" // clear zero reg
 
 		"	pop r16						\n"
 		"	out __SREG__, r16			\n"
