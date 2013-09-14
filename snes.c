@@ -1,7 +1,10 @@
-/* Nes/Snes/N64/Gamecube to Wiimote
- * Copyright (C) 2012 Raphaël Assénat
+/* Snes controller to Genesis/Megadrive adapter
+ * Copyright (C) 2013 Raphël Assénat
  *
- * Based on earlier work:
+ * This file is based on earlier work:
+ *
+ * Nes/Snes/N64/Gamecube to Wiimote
+ * Copyright (C) 2012 Raphaël Assénat
  *
  * Nes/Snes/Genesis/SMS/Atari to USB
  * Copyright (C) 2006-2007 Raphaël Assénat
