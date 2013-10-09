@@ -1,3 +1,9 @@
+***** 2013-10-06 : Version 1.1
+
+  - Implemented Atari/Commodore support:
+    - Two selectable button mappings
+    - Enabled by grounding PB1. Note: A slightly different DB9 wiring is required.
+
 ***** 2013-09-14 : Version 1.0 
 
 Initial release:

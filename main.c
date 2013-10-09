@@ -30,29 +30,29 @@ static void hwinit(void)
 	/* PORTB
 	 *
 	 * Bit	Function	Dir		Level/pu
-	 * 0	-			out		0
-	 * 1	-			out		0
-	 * 2	-			out		0
+	 * 0	JP COM		out		0
+	 * 1	JP1			in		1
+	 * 2	JP2			in		1
 	 * 3	SNES LATCH	out		0
 	 * 4	SNES DAT	In		1
 	 * 5	SNES CLK	out		1
 	 * 6	XTAL1
 	 * 7	XTAL2
 	 */
-	DDRB = 0x2F;
-	PORTB = 0x30;
+	DDRB = 0x29;
+	PORTB = 0x36;
 
 	/* PORTC
 	 *
 	 * Bit	Function	Dir		Level/pull-up
-	 * 0	START/C		In		0
-	 * 1	A/B			In		0
-	 * 2	0/RT/MODE	In		0
-	 * 3	0/LF/X		In		0
-	 * 4	DN/DN/Y		In		0
-	 * 5	UP/UP/Z		In		0
+	 * 0	START/C		In		1
+	 * 1	A/B			In		1
+	 * 2	0/RT/MODE	In		1
+	 * 3	0/LF/X		In		1
+	 * 4	DN/DN/Y		In		1
+	 * 5	UP/UP/Z		In		1
 	 */
-	DDRC = 0xFF;
+	DDRC = 0x00;
 	PORTC = 0xFF;
 
 	/* PORTD
@@ -72,7 +72,7 @@ static void hwinit(void)
 
 }
 
-volatile uint8_t mddata[8] = { 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff };
+volatile uint8_t mddata[8] = { 0xff,0xf3,0xff,0xf3,0xff,0xc3,0xff,0xff };
 volatile uint8_t dat_pos;
 volatile uint8_t polled;
 
@@ -150,8 +150,13 @@ struct snes_md_map {
 #define GEN_BTN_DPAD_LEFT	{0x00, 0x08, 0x00 }
 #define GEN_BTN_DPAD_RIGHT	{0x00, 0x04, 0x00 }
 
+#define ATARI_BTN_DPAD_UP		{0x20, 0x20, 0x20 }
+#define ATARI_BTN_DPAD_DOWN		{0x10, 0x10, 0x10 }
+#define ATARI_BTN_DPAD_LEFT		{0x08, 0x08, 0x08 }
+#define ATARI_BTN_DPAD_RIGHT	{0x04, 0x04, 0x04 }
+#define ATARI_BTN_FIRE			{0x02, 0x02, 0x02 }
 
-struct snes_md_map default_map[] = {
+struct snes_md_map md_default_map[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_A },
 	{ SNES_BTN_B, 			GEN_BTN_B },
@@ -168,7 +173,7 @@ struct snes_md_map default_map[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map alt_map1[] = {
+struct snes_md_map md_alt_map1[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_B },
 	{ SNES_BTN_B, 			GEN_BTN_A },
@@ -185,7 +190,7 @@ struct snes_md_map alt_map1[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map alt_map2[] = {
+struct snes_md_map md_alt_map2[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_C },
 	{ SNES_BTN_B, 			GEN_BTN_B },
@@ -202,13 +207,40 @@ struct snes_md_map alt_map2[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-#define MAP_DEFAULT			0
-#define MAP_ALT1			1
-#define MAP_ALT2			2
-struct snes_md_map *maps[3] = {
-	default_map,
-	alt_map1,
-	alt_map2,
+struct snes_md_map atari_default_map[] = {
+	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
+	{ SNES_BTN_A,			ATARI_BTN_FIRE },
+	{ SNES_BTN_B,			ATARI_BTN_FIRE },
+	{ SNES_BTN_X,			ATARI_BTN_FIRE },
+	{ SNES_BTN_Y,			ATARI_BTN_FIRE },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+struct snes_md_map atari_alt_map1[] = {
+	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
+
+	{ SNES_BTN_A,			ATARI_BTN_FIRE },
+	{ SNES_BTN_B,			ATARI_BTN_DPAD_UP },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+#define MD_MAP_DEFAULT			0
+#define MD_MAP_ALT1				1
+#define MD_MAP_ALT2				2
+#define ATARI_MAP_DEFAULT		3
+#define ATARI_MAP_ALT1			4
+struct snes_md_map *maps[5] = {
+	md_default_map,
+	md_alt_map1,
+	md_alt_map2,
+	atari_default_map,
+	atari_alt_map1,
 };
 
 int main(void)
@@ -217,27 +249,67 @@ int main(void)
 	uint8_t next_data[8];
 	Gamepad *snespad;
 	uint8_t cur_map_id;
+	char atari_mode;
 
 	hwinit();
 
+	if (PIND & (1<<PIND2)) {
+		dat_pos = 1;
+		PORTC = mddata[0];
+	} else {
+		dat_pos = 0;
+	}
+
+	dat_pos = 1;
+
 	_delay_ms(50);
+
+	/* If PB1 and/or PB2 are shorted to GND (or PB0 which is 
+	 * configured as an output), run in Atari-style mode. */
+	switch (PINB & 0x06) {
+		case 0x06:
+			atari_mode = 0;
+			break;
+		default:
+			atari_mode = 1;				
+	}
 
 	snespad = snesGetGamepad();
 	snespad->update();
 	snespad->getReport(&last_data);
 
-	switch (last_data.snes.buttons)
-	{
-		default:
-		case SNES_BTN_A:
-			cur_map_id = MAP_DEFAULT;	
-			break;
-		case SNES_BTN_B:
-			cur_map_id = MAP_ALT1;	
-			break;
-		case SNES_BTN_Y:
-			cur_map_id = MAP_ALT2;	
-			break;
+	if (!atari_mode) {
+		// Push-pull drive for Genesis
+		DDRC = 0xFF;
+		PORTC = 0xFf;
+
+		switch (last_data.snes.buttons)
+		{
+			default:
+			case SNES_BTN_A:
+				cur_map_id = MD_MAP_DEFAULT;	
+				break;
+			case SNES_BTN_B:
+				cur_map_id = MD_MAP_ALT1;	
+				break;
+			case SNES_BTN_Y:
+				cur_map_id = MD_MAP_ALT2;	
+				break;
+		}
+	} else {
+		// Simulated open-collector/switch drive for Atari
+		DDRC = 0x00;
+		PORTC = 0x00;
+		switch (last_data.snes.buttons)
+		{
+			default:
+			case SNES_BTN_A:
+				cur_map_id = ATARI_MAP_DEFAULT;	
+				break;
+			case SNES_BTN_B:
+				cur_map_id = ATARI_MAP_ALT1;	
+				break;
+		}
 	}
 
 	// setup SELECT external interrupt
@@ -253,8 +325,10 @@ int main(void)
 	MCUCR &= ~(1<<ISC01);
 	GICR |= (1<<INT0);
 
-
-	sei();
+	if (!atari_mode) {
+		// Interrupts are only used by the Genesis mode
+		sei();
+	}
 
 	while(1)
 	{
@@ -262,20 +336,30 @@ int main(void)
 		uint8_t sel_low_dat, sel_high_dat, sel_x_dat;
 		int i;
 
-		polled = 0;
-		while (!polled) { }
-		_delay_ms(1.5);
+		if (!atari_mode)
+		{
+			// Genesis mode
+			polled = 0;
+			while (!polled) { }
+			_delay_ms(1.5);
 
-		// Timeout from the 6button mode
-		memcpy((void*)mddata, next_data, 8);
-		if (PIND & (1<<PIND2)) {
-			dat_pos = 1;
-			PORTC = mddata[0];
-		} else {
-			dat_pos = 0;
+			// Timeout from the 6button mode
+			memcpy((void*)mddata, next_data, 8);
+			if (PIND & (1<<PIND2)) {
+				dat_pos = 1;
+				PORTC = mddata[0];
+			} else {
+				dat_pos = 0;
+			}
+
+			ICR1L = mddata[dat_pos];
 		}
-
-		ICR1L = mddata[dat_pos];
+		else {
+			// Atari mode
+			PORTC = 0x00;
+			DDRC = next_data[0] ^ 0xff;
+			_delay_ms(15);
+		}
 		
 		snespad->update();
 		snespad->getReport(&last_data);
@@ -311,4 +395,3 @@ int main(void)
 
 	return 0;
 }
-
