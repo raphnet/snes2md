@@ -1,3 +1,6 @@
+***** 2013-10-21 : Version 1.2
+  - Added a new Genesis mapping
+
 ***** 2013-10-20 : Version 1.1.1
   - Updated atari mappings (one added, one modified)
 

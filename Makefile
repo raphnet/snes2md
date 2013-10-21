@@ -2,7 +2,7 @@ CC=avr-gcc
 AS=$(CC)
 LD=$(CC)
 CPU=atmega8
-CFLAGS=-Wall -mmcu=$(CPU) -DF_CPU=16000000L -Os -g
+CFLAGS=-Wall -mmcu=$(CPU) -DF_CPU=16000000L -Os -g -Werror
 LDFLAGS=-mmcu=$(CPU) -Wl,-Map=snes2md.map -Wl,--section-start=.boot=0x1800 
 AVRDUDE=avrdude -p m8 -P usb -c avrispmkII
 

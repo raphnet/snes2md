@@ -207,6 +207,23 @@ struct snes_md_map md_alt_map2[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
+struct snes_md_map md_alt_map3[] = {
+	{ SNES_BTN_X,			GEN_BTN_A },
+	{ SNES_BTN_Y, 			GEN_BTN_B },
+	{ SNES_BTN_B,			GEN_BTN_C },
+	{ SNES_BTN_A,			GEN_BTN_X },
+	{ SNES_BTN_R,			GEN_BTN_Y },
+	{ SNES_BTN_L,			GEN_BTN_Z },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_RIGHT },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+
 struct snes_md_map atari_default_map[] = {
 	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
@@ -243,13 +260,15 @@ struct snes_md_map atari_alt_map2[] = {
 #define MD_MAP_DEFAULT			0
 #define MD_MAP_ALT1				1
 #define MD_MAP_ALT2				2
-#define ATARI_MAP_DEFAULT		3
-#define ATARI_MAP_ALT1			4
-#define ATARI_MAP_ALT2			5
-struct snes_md_map *maps[6] = {
+#define MD_MAP_ALT3				3
+#define ATARI_MAP_DEFAULT		4
+#define ATARI_MAP_ALT1			5
+#define ATARI_MAP_ALT2			6
+struct snes_md_map *maps[7] = {
 	md_default_map,
 	md_alt_map1,
 	md_alt_map2,
+	md_alt_map3,
 	atari_default_map,
 	atari_alt_map1,
 	atari_alt_map2,
@@ -306,6 +325,9 @@ int main(void)
 				break;
 			case SNES_BTN_Y:
 				cur_map_id = MD_MAP_ALT2;	
+				break;
+			case SNES_BTN_X:
+				cur_map_id = MD_MAP_ALT3;
 				break;
 		}
 	} else {
