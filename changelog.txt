@@ -1,5 +1,6 @@
-***** 2013-10-21 : Version 1.2
+***** 2013-10-26 : Version 1.2
   - Added a new Genesis mapping
+  - Added auto-fire for Atari mode. Selectable auto-fire speed: 30Hz, 25Hz, 20Hz, 16.667Hz, 15Hz and 12.5Hz
 
 ***** 2013-10-20 : Version 1.1.1
   - Updated atari mappings (one added, one modified)
