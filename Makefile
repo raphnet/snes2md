@@ -31,5 +31,8 @@ fuse:
 flash: snes2md.hex
 	$(AVRDUDE) -Uflash:w:snes2md.hex -B 1.0
 
+reset:
+	$(AVRDUDE) -B 1.0
+
 %.o: %.S
 	$(CC) $(CFLAGS) -c $<

@@ -249,12 +249,12 @@ struct snes_md_map atari_style2_map[] = {
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
-
-	{ SNES_BTN_A,			ATARI_BTN_FIRE },
-	{ SNES_BTN_X,			ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_B,			ATARI_BTN_DPAD_UP },
 
-	{ SNES_BTN_Y,			ATARI_BTN_FIRE2 },
+	{ SNES_BTN_A,			ATARI_BTN_FIRE },
+	{ SNES_BTN_X,			ATARI_BTN_FIRE2 },
+
+	{ SNES_BTN_Y,			ATARI_BTN_FIRE,	OPT_TURBO },
 
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
@@ -264,11 +264,12 @@ struct snes_md_map atari_style3_map[] = {
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
+	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
 
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
+	{ SNES_BTN_X,			ATARI_BTN_FIRE2	 },
+	
 	{ SNES_BTN_Y,			ATARI_BTN_FIRE,		OPT_TURBO },
-	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
-	{ SNES_BTN_X,			ATARI_BTN_DPAD_UP,	OPT_TURBO },
 	
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
@@ -390,6 +391,7 @@ int main(void)
 	Gamepad *snespad;
 	uint8_t cur_map_id;
 	char atari_mode;
+	char ignore_buttons = 1;
 
 	hwinit();
 
@@ -402,7 +404,7 @@ int main(void)
 
 	dat_pos = 1;
 
-	_delay_ms(50);
+	_delay_ms(20);
 
 	/* If PB1 and/or PB2 are shorted to GND (or PB0 which is 
 	 * configured as an output), run in Atari-style mode. */
@@ -529,12 +531,21 @@ int main(void)
 
 		map = maps[cur_map_id];
 		while (map->snes_btn) {
+			// To prevent buttons pressed at powerup (for mappings) from confusing
+			// controller detection, buttons are reported as idle until we first
+			// see a 'no button pressed' state.
+			if (ignore_buttons && (0 == (last_data.snes.buttons & SNES_BTN_ALL))) {
+				ignore_buttons = 0;
+			}
+
 			if ((last_data.snes.buttons & map->snes_btn))
 			{
 				if (!(map->opts&OPT_TURBO) || turbo_state) {
-					sel_low_dat |= map->s[0];
-					sel_high_dat |= map->s[1];
-					sel_x_dat |= map->s[2];
+					if (!ignore_buttons) {
+						sel_low_dat |= map->s[0];
+						sel_high_dat |= map->s[1];
+						sel_x_dat |= map->s[2];
+					}
 				}
 			}
 

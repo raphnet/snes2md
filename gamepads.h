@@ -87,6 +87,7 @@ typedef struct _snes_pad_data {
 #define SNES_BTN_L			0x2000
 #define SNES_BTN_R			0x1000
 
+#define SNES_BTN_ALL		0xf0ff
 
 typedef struct _nes_pad_data {
 	unsigned char pad_type; // PAD_TYPE_NES
