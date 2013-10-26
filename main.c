@@ -130,12 +130,16 @@ asm volatile(
 
 EMPTY_INTERRUPT(INT0_vect);
 
+#define OPT_TURBO			1	/* This button is turbo */
+#define OPT_TURBO_SEL_SPEED	2	/* This button cycles through turbo speeds */
+
 struct snes_md_map {
 	uint16_t snes_btn;
-
 	uint8_t s[3]; // [0] SELECT LOW STATE, [1] SELECT HIGH STATE, [2] 3RD HIGH STATE
+	char opts;
 };
 
+#define DB9_NULL			{0x00, 0x00, 0x00 }
 
 #define GEN_BTN_A			{0x02, 0x00, 0x00 }
 #define GEN_BTN_B			{0x00, 0x02, 0x00 }
@@ -155,6 +159,8 @@ struct snes_md_map {
 #define ATARI_BTN_DPAD_LEFT		{0x08, 0x08, 0x08 }
 #define ATARI_BTN_DPAD_RIGHT	{0x04, 0x04, 0x04 }
 #define ATARI_BTN_FIRE			{0x02, 0x02, 0x02 }
+#define ATARI_BTN_FIRE2			{0x01, 0x01, 0x01 }
+
 
 struct snes_md_map md_default_map[] = {
 
@@ -224,35 +230,47 @@ struct snes_md_map md_alt_map3[] = {
 };
 
 
-struct snes_md_map atari_default_map[] = {
+struct snes_md_map atari_style1_map[] = {
 	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_A,			ATARI_BTN_FIRE },
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
-	{ SNES_BTN_X,			ATARI_BTN_FIRE },
-	{ SNES_BTN_Y,			ATARI_BTN_FIRE },
+	
+	{ SNES_BTN_Y,			ATARI_BTN_FIRE, OPT_TURBO },
+	{ SNES_BTN_X,			ATARI_BTN_FIRE2, },
+
+	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map atari_alt_map1[] = {
+struct snes_md_map atari_style2_map[] = {
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 
 	{ SNES_BTN_A,			ATARI_BTN_FIRE },
+	{ SNES_BTN_X,			ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_B,			ATARI_BTN_DPAD_UP },
+
+	{ SNES_BTN_Y,			ATARI_BTN_FIRE2 },
+
+	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map atari_alt_map2[] = {
+struct snes_md_map atari_style3_map[] = {
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
+	{ SNES_BTN_Y,			ATARI_BTN_FIRE,		OPT_TURBO },
 	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
+	{ SNES_BTN_X,			ATARI_BTN_DPAD_UP,	OPT_TURBO },
+	
+	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
@@ -269,10 +287,101 @@ struct snes_md_map *maps[7] = {
 	md_alt_map1,
 	md_alt_map2,
 	md_alt_map3,
-	atari_default_map,
-	atari_alt_map1,
-	atari_alt_map2,
+	atari_style1_map,
+	atari_style2_map,
+	atari_style3_map,
 };
+
+#define TURBO_SPEED_30		0 // 60 / 2
+#define TURBO_SPEED_25		1 // 50 / 2
+#define TURBO_SPEED_20		2 // 60 / 3
+#define TURBO_SPEED_16		3 // 50 / 3
+#define TURBO_SPEED_15		4 // 60 / 4
+#define TURBO_SPEED_12_5	5 // 50 / 4
+
+static uint8_t turbo_speed = TURBO_SPEED_25;
+
+static void turboCycleSpeed(uint8_t btn_state)
+{
+	static uint8_t last_state;
+
+	if (btn_state && !last_state) {
+		turbo_speed++;
+		if (turbo_speed > TURBO_SPEED_12_5) {
+			turbo_speed = TURBO_SPEED_30;
+		}
+	}
+
+	last_state = btn_state;
+}
+
+static uint8_t turboGetTop(void)
+{
+	switch (turbo_speed)
+	{
+			// divide by 2
+		default:
+		case TURBO_SPEED_30:
+		case TURBO_SPEED_25:
+			return 2;
+
+			// divide by 3
+		case TURBO_SPEED_20:
+		case TURBO_SPEED_16:
+			return 3;
+
+			// divide by 4
+		case TURBO_SPEED_15:
+		case TURBO_SPEED_12_5:
+			return 4;
+	}
+}
+
+static void turboSleep(void)
+{
+	switch (turbo_speed)
+	{
+			// 120Hz base
+		default:
+		case TURBO_SPEED_30:
+		case TURBO_SPEED_20:
+		case TURBO_SPEED_15:
+//			_delay_us(8333);
+			// This delay is trimmed to account for overhead and obtain 29.97Hz.
+			_delay_us(8208);
+			break;
+	
+			// 100Hz base
+		case TURBO_SPEED_25:
+		case TURBO_SPEED_16:
+		case TURBO_SPEED_12_5:
+			//_delay_us(10000); // 24.66
+			_delay_us(9860); // 25 Hz
+			break;
+	}
+}
+
+static char turboPoll(void)
+{
+	static uint8_t c=0;
+
+	c = !c;
+
+	return c;
+}
+
+static uint8_t turbo_state=0;
+
+static void turboDo(void)
+{
+	static char turbo_count = 0;
+
+	if (turbo_count <= 0) {
+		turbo_count = turboGetTop();
+		turbo_state = !turbo_state;
+	}
+	turbo_count--;
+}
 
 int main(void)
 {
@@ -389,16 +498,30 @@ int main(void)
 			}
 
 			ICR1L = mddata[dat_pos];
+
+
+			snespad->update();
+			snespad->getReport(&last_data);
 		}
 		else {
 			// Atari mode
 			PORTC = 0x00;
 			DDRC = next_data[0] ^ 0xff;
-			_delay_ms(15);
+			turboSleep();
+
+			// make sure the controller is polled at
+			// 50/60 hz regardless of the loop
+			// timing for turbo which is higher.
+			if (turboPoll()) {
+				snespad->update();
+				snespad->getReport(&last_data);
+			}
 		}
 		
-		snespad->update();
-		snespad->getReport(&last_data);
+
+		turboDo();
+
+		
 
 		sel_low_dat = 0;
 		sel_high_dat = 0;
@@ -408,10 +531,17 @@ int main(void)
 		while (map->snes_btn) {
 			if ((last_data.snes.buttons & map->snes_btn))
 			{
-				sel_low_dat |= map->s[0];
-				sel_high_dat |= map->s[1];
-				sel_x_dat |= map->s[2];
+				if (!(map->opts&OPT_TURBO) || turbo_state) {
+					sel_low_dat |= map->s[0];
+					sel_high_dat |= map->s[1];
+					sel_x_dat |= map->s[2];
+				}
 			}
+
+			if ((map->opts&OPT_TURBO_SEL_SPEED)) {
+				turboCycleSpeed(last_data.snes.buttons & map->snes_btn);
+			}
+
 			map++;
 		}
 	
