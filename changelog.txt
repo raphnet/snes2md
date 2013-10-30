@@ -1,6 +1,9 @@
-***** 2013-10-26 : Version 1.2
-  - Added a new Genesis mapping
-  - Added auto-fire for Atari mode. Selectable auto-fire speed: 30Hz, 25Hz, 20Hz, 16.667Hz, 15Hz and 12.5Hz
+***** 2013-10-29 : Version 1.2
+  - Added two new Genesis mappings
+  - Added a new Atari mapping
+  - Added support for 2nd fire button (Amiga)
+  - Added auto-fire for Atari mode (Button 1/Fire). Selectable auto-fire speed: 30Hz, 25Hz, 20Hz, 16.667Hz, 15Hz and 12.5Hz
+  - Auto-fire lock mode for Button 1/Fire. (Toggled by START)
 
 ***** 2013-10-20 : Version 1.1.1
   - Updated atari mappings (one added, one modified)

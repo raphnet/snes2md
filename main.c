@@ -162,7 +162,7 @@ struct snes_md_map {
 #define ATARI_BTN_FIRE2			{0x01, 0x01, 0x01 }
 
 
-struct snes_md_map md_default_map[] = {
+struct snes_md_map md_snes1[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_A },
 	{ SNES_BTN_B, 			GEN_BTN_B },
@@ -179,7 +179,7 @@ struct snes_md_map md_default_map[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map md_alt_map1[] = {
+struct snes_md_map md_snes2[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_B },
 	{ SNES_BTN_B, 			GEN_BTN_A },
@@ -196,7 +196,7 @@ struct snes_md_map md_alt_map1[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map md_alt_map2[] = {
+struct snes_md_map md_snes3[] = {
 
 	{ SNES_BTN_A,			GEN_BTN_C },
 	{ SNES_BTN_B, 			GEN_BTN_B },
@@ -213,7 +213,7 @@ struct snes_md_map md_alt_map2[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
-struct snes_md_map md_alt_map3[] = {
+struct snes_md_map md_snes4[] = {
 	{ SNES_BTN_X,			GEN_BTN_A },
 	{ SNES_BTN_Y, 			GEN_BTN_B },
 	{ SNES_BTN_B,			GEN_BTN_C },
@@ -229,18 +229,31 @@ struct snes_md_map md_alt_map3[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
+struct snes_md_map md_snes5[] = {
+	{ SNES_BTN_A,			GEN_BTN_A },
+	{ SNES_BTN_B, 			GEN_BTN_B },
+	{ SNES_BTN_X,			GEN_BTN_C },
+	{ SNES_BTN_Y,			GEN_BTN_X },
+	{ SNES_BTN_L,			GEN_BTN_Y },
+	{ SNES_BTN_R,			GEN_BTN_Z },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_RIGHT },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
 
 struct snes_md_map atari_style1_map[] = {
 	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
-	{ SNES_BTN_A,			ATARI_BTN_FIRE },
-	{ SNES_BTN_B,			ATARI_BTN_FIRE },
+	{ SNES_BTN_A | SNES_BTN_B,		ATARI_BTN_FIRE },
 	
-	{ SNES_BTN_Y,			ATARI_BTN_FIRE, OPT_TURBO },
-	{ SNES_BTN_X,			ATARI_BTN_FIRE2, },
-
+	{ SNES_BTN_Y | SNES_BTN_R,		ATARI_BTN_FIRE,	OPT_TURBO },
+	{ SNES_BTN_X | SNES_BTN_L,		ATARI_BTN_FIRE2, },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
@@ -250,12 +263,10 @@ struct snes_md_map atari_style2_map[] = {
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_B,			ATARI_BTN_DPAD_UP },
-
 	{ SNES_BTN_A,			ATARI_BTN_FIRE },
-	{ SNES_BTN_X,			ATARI_BTN_FIRE2 },
-
-	{ SNES_BTN_Y,			ATARI_BTN_FIRE,	OPT_TURBO },
-
+	
+	{ SNES_BTN_Y | SNES_BTN_R,			ATARI_BTN_FIRE,	OPT_TURBO },
+	{ SNES_BTN_X | SNES_BTN_L,			ATARI_BTN_FIRE2, },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
@@ -265,32 +276,49 @@ struct snes_md_map atari_style3_map[] = {
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
-
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
-	{ SNES_BTN_X,			ATARI_BTN_FIRE2	 },
 	
-	{ SNES_BTN_Y,			ATARI_BTN_FIRE,		OPT_TURBO },
+	{ SNES_BTN_X | SNES_BTN_L,			ATARI_BTN_FIRE2	 },
+	{ SNES_BTN_Y | SNES_BTN_R,			ATARI_BTN_FIRE,	OPT_TURBO },
+	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+struct snes_md_map atari_style4_map[] = {
+	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_RIGHT },
+	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
+	{ SNES_BTN_B,			ATARI_BTN_FIRE },
 	
+	{ SNES_BTN_X | SNES_BTN_L,	ATARI_BTN_FIRE2, },
+	{ SNES_BTN_Y | SNES_BTN_R,	ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
 
-#define MD_MAP_DEFAULT			0
-#define MD_MAP_ALT1				1
-#define MD_MAP_ALT2				2
-#define MD_MAP_ALT3				3
-#define ATARI_MAP_DEFAULT		4
-#define ATARI_MAP_ALT1			5
-#define ATARI_MAP_ALT2			6
-struct snes_md_map *maps[7] = {
-	md_default_map,
-	md_alt_map1,
-	md_alt_map2,
-	md_alt_map3,
+
+#define MD_MAP_SNES1			0
+#define MD_MAP_SNES2			1
+#define MD_MAP_SNES3			2
+#define MD_MAP_SNES4			3
+#define MD_MAP_SNES5			4
+#define ATARI_MAP_STYLE1		5
+#define ATARI_MAP_STYLE2		6
+#define ATARI_MAP_STYLE3		7
+#define ATARI_MAP_STYLE4		8
+struct snes_md_map *maps[9] = {
+	md_snes1,
+	md_snes2,
+	md_snes3,
+	md_snes4,
+	md_snes5,
 	atari_style1_map,
 	atari_style2_map,
 	atari_style3_map,
+	atari_style4_map,
 };
 
 #define TURBO_SPEED_30		0 // 60 / 2
@@ -311,6 +339,19 @@ static void turboCycleSpeed(uint8_t btn_state)
 		if (turbo_speed > TURBO_SPEED_12_5) {
 			turbo_speed = TURBO_SPEED_30;
 		}
+	}
+
+	last_state = btn_state;
+}
+
+static uint8_t turbo_lock_on = 0;
+
+static void turboToggleLockOn(uint8_t btn_state)
+{
+	static uint8_t last_state;
+
+	if (btn_state && !last_state) {
+		turbo_lock_on = !turbo_lock_on;
 	}
 
 	last_state = btn_state;
@@ -429,16 +470,19 @@ int main(void)
 		{
 			default:
 			case SNES_BTN_A:
-				cur_map_id = MD_MAP_DEFAULT;	
+				cur_map_id = MD_MAP_SNES1;
 				break;
 			case SNES_BTN_B:
-				cur_map_id = MD_MAP_ALT1;	
+				cur_map_id = MD_MAP_SNES2;
 				break;
 			case SNES_BTN_Y:
-				cur_map_id = MD_MAP_ALT2;	
+				cur_map_id = MD_MAP_SNES3;
 				break;
 			case SNES_BTN_X:
-				cur_map_id = MD_MAP_ALT3;
+				cur_map_id = MD_MAP_SNES4;
+				break;
+			case SNES_BTN_L:
+				cur_map_id = MD_MAP_SNES5;
 				break;
 		}
 	} else {
@@ -448,14 +492,16 @@ int main(void)
 		switch (last_data.snes.buttons)
 		{
 			default:
-				cur_map_id = ATARI_MAP_DEFAULT;	
+				cur_map_id = ATARI_MAP_STYLE1;
 				break;
 			case SNES_BTN_B:
-				cur_map_id = ATARI_MAP_ALT1;	
+				cur_map_id = ATARI_MAP_STYLE2;	
 				break;
 			case SNES_BTN_A:
-				cur_map_id = ATARI_MAP_ALT2;
+				cur_map_id = ATARI_MAP_STYLE3;
 				break;
+			case SNES_BTN_X:
+				cur_map_id = ATARI_MAP_STYLE4;
 		}
 	}
 
@@ -518,6 +564,8 @@ int main(void)
 				snespad->update();
 				snespad->getReport(&last_data);
 			}
+
+			turboToggleLockOn(last_data.snes.buttons & SNES_BTN_START);
 		}
 		
 
@@ -536,6 +584,16 @@ int main(void)
 			// see a 'no button pressed' state.
 			if (ignore_buttons && (0 == (last_data.snes.buttons & SNES_BTN_ALL))) {
 				ignore_buttons = 0;
+			}
+
+			if (map->opts&OPT_TURBO) {
+				if (turbo_lock_on) {
+					if (turbo_state && !ignore_buttons) {
+						sel_low_dat |= map->s[0];
+						sel_high_dat |= map->s[1];
+						sel_x_dat |= map->s[2];
+					}
+				}
 			}
 
 			if ((last_data.snes.buttons & map->snes_btn))
