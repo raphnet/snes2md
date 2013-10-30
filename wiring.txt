@@ -23,3 +23,16 @@ CLOCK              PB5
 DATA               PB4
 LATCH              PB3
 
+
+-- Atari/commodore wiring -
+
+DB9 Pin     Signal name   AVR pin name
+1           UP            PC5
+2           DN            PC4
+3           LF            PC3
+4           RT            PC2
+6           Fire          PC1
+7           VCC           VCC
+8           GND           GND
+9           Fire 2        PC0
+
