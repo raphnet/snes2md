@@ -60,7 +60,7 @@ static void hwinit(void)
 	 * Bit	Function	Dir		Level/pull-up
 	 * 0	-			Out		0  \___ tied together on multiuse PCB2
 	 * 1	-			Out		0  /
-	 * 2	SELECT		In		1
+	 * 2	SELECT		In		1* see note
 	 * 3	-			Out		0
 	 * 4	VCC			In		0  <---- Shorted to GND on multiuse PCB2
 	 * 5	-			Out		0
@@ -68,8 +68,33 @@ static void hwinit(void)
 	 * 7	-			Out		0
 	 */
 	DDRD = 0xEB;
-	PORTD = 0x04;
+//	PORTD = 0x04; // see note
+	PORTD = 0x00;
 
+	// Note: Games like GoldenAxe II let the SELECT line float for a moment. With
+	// the internal pull-up, the signal rises slowly and sometimes is seen as a
+	// logic 1, but just barely. Depending on which buttons are pressed on the
+	// controller, the ramping up of the SELECT signal is not always smooth, and
+	// this is seen as a series of transition by the adapter which updates the
+	// buttons.
+	//
+	//
+	//       No buttons pressed            Buttons pressed
+	// 1       ___        _             ___          _
+	//        |   |      | |           |   |    , , | |
+	//        |   |   /| | |           |   |   /|/| | |
+	// 0 _____|   |__/ |_| |____   ____|   |__/   |_| |___
+	//
+	//              ^^^^                      ^^^^
+	//
+	// Disabling the internal pullup seems to help, but ideally an external pull-down
+	// resistor should be added. Goldenaxe II is known to misbehave with 6 button
+	// controllers. This is solved by forcing 3 button mode (by holding MODE at power
+	// up).
+	//
+	// Interestingly, the adapter does not need to be in compatibility mode for this
+	// game. Maybe the behaviour shown above is what cause problems with real 6
+	// button controllers?
 }
 
 volatile uint8_t mddata[8] = { 0xff,0xf3,0xff,0xf3,0xff,0xc3,0xff,0xff };
@@ -433,6 +458,7 @@ int main(void)
 	uint8_t cur_map_id;
 	char atari_mode;
 	char ignore_buttons = 1;
+	char tribtn_compat = 0;
 
 	hwinit();
 
@@ -466,7 +492,7 @@ int main(void)
 		DDRC = 0xFF;
 		PORTC = 0xFf;
 
-		switch (last_data.snes.buttons)
+		switch (last_data.snes.buttons & (~SNES_BTN_SELECT))
 		{
 			default:
 			case SNES_BTN_A:
@@ -485,6 +511,12 @@ int main(void)
 				cur_map_id = MD_MAP_SNES5;
 				break;
 		}
+
+		// If select is down, enable 3 button compatibility mode
+		if (last_data.snes.buttons & SNES_BTN_SELECT) {
+			tribtn_compat = 1;
+		}
+
 	} else {
 		// Simulated open-collector/switch drive for Atari
 		DDRC = 0x00;
@@ -542,6 +574,7 @@ int main(void)
 				dat_pos = 1;
 				PORTC = mddata[0];
 			} else {
+				PORTC = mddata[1];
 				dat_pos = 0;
 			}
 
@@ -613,15 +646,27 @@ int main(void)
 
 			map++;
 		}
-	
-		next_data[0] = sel_high_dat;	
-		next_data[1] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
-		next_data[2] = sel_high_dat;
-		next_data[3] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
-		next_data[4] = sel_high_dat;
-		next_data[5] = sel_low_dat | 0x3c; // FORCE UP/Dn/lef/right to 0 for detection.
-		next_data[6] = sel_x_dat;
-		next_data[7] = sel_high_dat & 0x03; // Keep Up/Dn/Left/Right high for detection.
+
+		if (tribtn_compat) {
+			next_data[0] = sel_high_dat;
+			next_data[1] = sel_low_dat | 0x0c;
+			next_data[2] = sel_high_dat;
+			next_data[3] = sel_low_dat | 0x0c;
+			next_data[4] = sel_high_dat;
+			next_data[5] = sel_low_dat | 0x0c;
+			next_data[6] = sel_high_dat;
+			next_data[7] = sel_low_dat | 0x0c;
+		}
+		else {
+			next_data[0] = sel_high_dat;
+			next_data[1] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
+			next_data[2] = sel_high_dat;
+			next_data[3] = sel_low_dat | 0x0c; // Force right/left to 0 for detection
+			next_data[4] = sel_high_dat;
+			next_data[5] = sel_low_dat | 0x3c; // FORCE UP/Dn/lef/right to 0 for detection.
+			next_data[6] = sel_x_dat;
+			next_data[7] = sel_high_dat & 0x03; // Keep Up/Dn/Left/Right high for detection.
+		}
 
 		for (i=0; i<8; i++) {
 			next_data[i] ^= 0xff;
