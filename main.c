@@ -1,5 +1,5 @@
 /* Snes controller to Genesis/Megadrive adapter
- * Copyright (C) 2013 Raphël Assénat
+ * Copyright (C) 2013-2014 Raphël Assénat
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,11 +107,11 @@ void fastint(void)
 {
 asm volatile(
 		"	nop\nnop\n					\n" // VECTOR 1 : RESET
-	
-		"	in __zero_reg__, 0x26 	; ICR1L		\n" 
+
+		"	in __zero_reg__, 0x26 	; ICR1L		\n"
 		"	out 0x15, __zero_reg__	; PORTC		\n"
 
-		// Now, let's prepare for the next transition...	
+		// Now, let's prepare for the next transition...
 
 		"	push r16					\n"
 		"	push r30					\n"
@@ -119,7 +119,7 @@ asm volatile(
 
 		"	in r16, __SREG__			\n"
 		"	push r16					\n"
-		
+
 		// notify main loop
 		"	ldi r16, 1					\n"
 		"	sts polled, r16				\n"
@@ -132,19 +132,19 @@ asm volatile(
 
 		"	ldi r30, lo8(mddata)		\n" // get mdata base adress into Z
 		"	ldi r31, hi8(mddata)		\n"
-	
+
 		"	add r30, r16				\n" // Add current index to Z
 		"	ldi r16, 0					\n"
 		"	adc r31, r16				\n"
-		
+
 		"	ld r16, Z					\n"
 		"	out 0x26, r16			;	 ICR1L		\n" // next value
-		
+
 		"	clr __zero_reg__			\n" // clear zero reg
 
 		"	pop r16						\n"
 		"	out __SREG__, r16			\n"
-		
+
 		"	pop r31						\n" // r31
 		"	pop r30						\n" // r30
 		"	pop r16						\n" // r16
@@ -196,7 +196,7 @@ struct snes_md_map md_snes1[] = {
 	{ SNES_BTN_L,			GEN_BTN_Y },
 	{ SNES_BTN_R,			GEN_BTN_Z },
 	{ SNES_BTN_START,		GEN_BTN_START },
-	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
 	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
@@ -213,7 +213,7 @@ struct snes_md_map md_snes2[] = {
 	{ SNES_BTN_L,			GEN_BTN_Y },
 	{ SNES_BTN_R,			GEN_BTN_Z },
 	{ SNES_BTN_START,		GEN_BTN_START },
-	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
 	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
@@ -230,7 +230,7 @@ struct snes_md_map md_snes3[] = {
 	{ SNES_BTN_L,			GEN_BTN_X },
 	{ SNES_BTN_R,			GEN_BTN_Z },
 	{ SNES_BTN_START,		GEN_BTN_START },
-	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
 	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
@@ -246,7 +246,7 @@ struct snes_md_map md_snes4[] = {
 	{ SNES_BTN_R,			GEN_BTN_Y },
 	{ SNES_BTN_L,			GEN_BTN_Z },
 	{ SNES_BTN_START,		GEN_BTN_START },
-	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
 	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
@@ -262,7 +262,7 @@ struct snes_md_map md_snes5[] = {
 	{ SNES_BTN_L,			GEN_BTN_Y },
 	{ SNES_BTN_R,			GEN_BTN_Z },
 	{ SNES_BTN_START,		GEN_BTN_START },
-	{ SNES_BTN_SELECT,		GEN_BTN_MODE },	
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
 	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_DOWN },
 	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_LEFT },
@@ -276,7 +276,7 @@ struct snes_md_map atari_style1_map[] = {
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_LEFT },
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_A | SNES_BTN_B,		ATARI_BTN_FIRE },
-	
+
 	{ SNES_BTN_Y | SNES_BTN_R,		ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_X | SNES_BTN_L,		ATARI_BTN_FIRE2, },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
@@ -289,7 +289,7 @@ struct snes_md_map atari_style2_map[] = {
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_B,			ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_A,			ATARI_BTN_FIRE },
-	
+
 	{ SNES_BTN_Y | SNES_BTN_R,			ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_X | SNES_BTN_L,			ATARI_BTN_FIRE2, },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
@@ -302,7 +302,7 @@ struct snes_md_map atari_style3_map[] = {
 	{ SNES_BTN_DPAD_RIGHT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
-	
+
 	{ SNES_BTN_X | SNES_BTN_L,			ATARI_BTN_FIRE2	 },
 	{ SNES_BTN_Y | SNES_BTN_R,			ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
@@ -316,7 +316,7 @@ struct snes_md_map atari_style4_map[] = {
 	{ SNES_BTN_DPAD_LEFT,	ATARI_BTN_DPAD_RIGHT },
 	{ SNES_BTN_A,			ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_B,			ATARI_BTN_FIRE },
-	
+
 	{ SNES_BTN_X | SNES_BTN_L,	ATARI_BTN_FIRE2, },
 	{ SNES_BTN_Y | SNES_BTN_R,	ATARI_BTN_FIRE,	OPT_TURBO },
 	{ SNES_BTN_SELECT,		DB9_NULL,	OPT_TURBO_SEL_SPEED },
@@ -417,7 +417,7 @@ static void turboSleep(void)
 			// This delay is trimmed to account for overhead and obtain 29.97Hz.
 			_delay_us(8208);
 			break;
-	
+
 			// 100Hz base
 		case TURBO_SPEED_25:
 		case TURBO_SPEED_16:
@@ -473,14 +473,14 @@ int main(void)
 
 	_delay_ms(20);
 
-	/* If PB1 and/or PB2 are shorted to GND (or PB0 which is 
+	/* If PB1 and/or PB2 are shorted to GND (or PB0 which is
 	 * configured as an output), run in Atari-style mode. */
 	switch (PINB & 0x06) {
 		case 0x06:
 			atari_mode = 0;
 			break;
 		default:
-			atari_mode = 1;				
+			atari_mode = 1;
 	}
 
 	snespad = snesGetGamepad();
@@ -527,7 +527,7 @@ int main(void)
 				cur_map_id = ATARI_MAP_STYLE1;
 				break;
 			case SNES_BTN_B:
-				cur_map_id = ATARI_MAP_STYLE2;	
+				cur_map_id = ATARI_MAP_STYLE2;
 				break;
 			case SNES_BTN_A:
 				cur_map_id = ATARI_MAP_STYLE3;
@@ -539,9 +539,9 @@ int main(void)
 
 	// setup SELECT external interrupt
 	//
-	
+
 	// Move the vector to the bootloader section where we have direct code for
-	// INT0.	
+	// INT0.
 	GICR = (1<<IVCE);
 	GICR = (1<<IVSEL);
 
@@ -600,11 +600,8 @@ int main(void)
 
 			turboToggleLockOn(last_data.snes.buttons & SNES_BTN_START);
 		}
-		
 
 		turboDo();
-
-		
 
 		sel_low_dat = 0;
 		sel_high_dat = 0;
