@@ -459,6 +459,7 @@ int main(void)
 	char atari_mode;
 	char ignore_buttons = 1;
 	char tribtn_compat = 0;
+	char genesis_polling = 0;
 
 	hwinit();
 
@@ -563,26 +564,56 @@ int main(void)
 
 		if (!atari_mode)
 		{
-			// Genesis mode
-			polled = 0;
-			while (!polled) { }
-			_delay_ms(1.5);
+			if (!genesis_polling) {
+				_delay_ms(15);
+				snespad->update();
+				snespad->getReport(&last_data);
 
-			// Timeout from the 6button mode
-			memcpy((void*)mddata, next_data, 8);
-			if (PIND & (1<<PIND2)) {
-				dat_pos = 1;
-				PORTC = mddata[0];
-			} else {
-				PORTC = mddata[1];
-				dat_pos = 0;
+				memcpy((void*)mddata, next_data, 8);
+				if (PIND & (1<<PIND2)) {
+					dat_pos = 1;
+					PORTC = mddata[0];
+				} else {
+					PORTC = mddata[1];
+					dat_pos = 0;
+				}
+
+				ICR1L = mddata[dat_pos];
+				if (polled) {
+					genesis_polling = 1;
+				}
 			}
+			else {
+				char c = 0;
+				// Genesis mode
+				polled = 0;
+				while (!polled) {
+					c++;
+					_delay_ms(1);
+					if (c > 100) {
+						// After 100ms, fall back to self-timed mode (for SMS games)
+						genesis_polling = 0;
+						break;
+					}
+				}
+				_delay_ms(1.5);
 
-			ICR1L = mddata[dat_pos];
+				// Timeout from the 6button mode
+				memcpy((void*)mddata, next_data, 8);
+				if (PIND & (1<<PIND2)) {
+					dat_pos = 1;
+					PORTC = mddata[0];
+				} else {
+					PORTC = mddata[1];
+					dat_pos = 0;
+				}
+
+				ICR1L = mddata[dat_pos];
 
 
-			snespad->update();
-			snespad->getReport(&last_data);
+				snespad->update();
+				snespad->getReport(&last_data);
+			}
 		}
 		else {
 			// Atari mode
