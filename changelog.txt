@@ -1,4 +1,4 @@
-***** 2016-10-13 : Version 1.6
+***** 2016-10-13 : Version 1.5
   - Add Atmega168 support
 
 ***** 2014-07-20 : Version 1.4
