@@ -540,7 +540,7 @@ int main(void)
 
 	// setup SELECT external interrupt
 	//
-
+#if defined(__AVR_ATmega8__)
 	// Move the vector to the bootloader section where we have direct code for
 	// INT0.
 	GICR = (1<<IVCE);
@@ -550,6 +550,17 @@ int main(void)
 	MCUCR |= (1<<ISC00); // Any change generates an interrupt
 	MCUCR &= ~(1<<ISC01);
 	GICR |= (1<<INT0);
+#elif defined(__AVR_ATmega168__)
+	/* Move the vector to the bootloader section where we have direct code for INT0. */
+	MCUCR = (1<<IVCE);
+	MCUCR = (1<<IVSEL);
+
+	/* Any changes triggers INT0 */
+	EICRA = (1<<ISC00);
+	EIMSK = (1<<INT0);
+#else
+#error MCU not supported
+#endif
 
 	if (!atari_mode) {
 		// Interrupts are only used by the Genesis mode
