@@ -1,5 +1,5 @@
 /* Snes controller to Genesis/Megadrive adapter
- * Copyright (C) 2013 Raphël Assénat
+ * Copyright (C) 2013-2016 Raphël Assénat
  *
  * This file is based on earlier work:
  *

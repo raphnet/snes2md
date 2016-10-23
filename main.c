@@ -1,5 +1,5 @@
 /* Snes controller to Genesis/Megadrive adapter
- * Copyright (C) 2013-2014 Raphël Assénat
+ * Copyright (C) 2013-2016 Raphël Assénat
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
