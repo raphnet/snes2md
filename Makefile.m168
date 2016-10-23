@@ -3,7 +3,7 @@ AS=$(CC)
 LD=$(CC)
 CPU=atmega168
 CFLAGS=-Wall -mmcu=$(CPU) -DF_CPU=16000000L -Os -g -Werror
-LDFLAGS=-mmcu=$(CPU) -Wl,-Map=snes2md.map -Wl,--section-start=.boot=0x1800 
+LDFLAGS=-mmcu=$(CPU) -Wl,-Map=snes2md.map -Wl,--section-start=.boot=0x3800
 AVRDUDE=avrdude -p m168 -P usb -c avrispmkII
 
 OBJS=main.o snes.o
