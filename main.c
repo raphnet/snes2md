@@ -108,8 +108,18 @@ void fastint(void)
 asm volatile(
 		"	nop\nnop\n					\n" // VECTOR 1 : RESET
 
+#if defined(__AVR_ATmega168__)
+		// PORTC address is different.
+		// And we can only use the first 64 registers
+		// with in/out instructions. So ICR1L was not available.
+		"	in __zero_reg__, 0x27 	; OCR0A		\n"
+		"	out 0x08, __zero_reg__	; PORTC		\n"
+#elif defined(__AVR_ATmega8__)
 		"	in __zero_reg__, 0x26 	; ICR1L		\n"
 		"	out 0x15, __zero_reg__	; PORTC		\n"
+#else
+#error MCU not supported yet
+#endif
 
 		// Now, let's prepare for the next transition...
 
@@ -138,7 +148,14 @@ asm volatile(
 		"	adc r31, r16				\n"
 
 		"	ld r16, Z					\n"
+
+#if defined(__AVR_ATmega168__)
+		"	out 0x27, r16			;	 OCR0A		\n" // next value
+#elif defined(__AVR_ATmega8__)
 		"	out 0x26, r16			;	 ICR1L		\n" // next value
+#else
+#error MCU not supported yet
+#endif
 
 		"	clr __zero_reg__			\n" // clear zero reg
 
@@ -589,7 +606,13 @@ int main(void)
 					dat_pos = 0;
 				}
 
+#if defined(__AVR_ATmega168__)
+				OCR0A = mddata[dat_pos];
+#elif defined(__AVR_ATmega8__)
 				ICR1L = mddata[dat_pos];
+#else
+#error MCU not supported yet
+#endif
 				if (polled) {
 					genesis_polling = 1;
 				}
@@ -619,7 +642,13 @@ int main(void)
 					dat_pos = 0;
 				}
 
+#if defined(__AVR_ATmega168__)
+				OCR0A = mddata[dat_pos];
+#elif defined(__AVR_ATmega8__)
 				ICR1L = mddata[dat_pos];
+#else
+#error MCU not supported yet
+#endif
 
 
 				snespad->update();
