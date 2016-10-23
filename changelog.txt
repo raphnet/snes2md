@@ -1,4 +1,7 @@
-***** 2016-10-13 : Version 1.5
+***** 2016-10-22 : Version 1.5.1
+  - Fix Atmega168 support (was in fact totally broken in v1.5)
+
+***** 2016-10-13 : Version 1.5 ** BROKEN **
   - Add Atmega168 support
 
 ***** 2014-07-20 : Version 1.4
