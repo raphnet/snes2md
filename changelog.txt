@@ -1,3 +1,6 @@
+***** 2016-10-22 : Version 1.6
+  - Add a new SNES mapping (SNES 6 - Hold R)
+
 ***** 2016-10-22 : Version 1.5.1
   - Fix Atmega168 support (was in fact totally broken in v1.5)
 

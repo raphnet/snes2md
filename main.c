@@ -287,6 +287,23 @@ struct snes_md_map md_snes5[] = {
 	{ 0, }, /* SNES btns == 0 termination. */
 };
 
+struct snes_md_map md_snes6[] = {
+	{ SNES_BTN_A,			GEN_BTN_B },
+	{ SNES_BTN_B, 			GEN_BTN_A },
+	{ SNES_BTN_X,			GEN_BTN_Y },
+	{ SNES_BTN_Y,			GEN_BTN_X },
+	{ SNES_BTN_L,			GEN_BTN_Z },
+	{ SNES_BTN_R,			GEN_BTN_C },
+	{ SNES_BTN_START,		GEN_BTN_START },
+	{ SNES_BTN_SELECT,		GEN_BTN_MODE },
+	{ SNES_BTN_DPAD_UP,		GEN_BTN_DPAD_UP },
+	{ SNES_BTN_DPAD_DOWN,	GEN_BTN_DPAD_DOWN },
+	{ SNES_BTN_DPAD_LEFT,	GEN_BTN_DPAD_LEFT },
+	{ SNES_BTN_DPAD_RIGHT,	GEN_BTN_DPAD_RIGHT },
+	{ 0, }, /* SNES btns == 0 termination. */
+};
+
+
 struct snes_md_map atari_style1_map[] = {
 	{ SNES_BTN_DPAD_UP,		ATARI_BTN_DPAD_UP },
 	{ SNES_BTN_DPAD_DOWN,	ATARI_BTN_DPAD_DOWN },
@@ -351,7 +368,8 @@ struct snes_md_map atari_style4_map[] = {
 #define ATARI_MAP_STYLE2		6
 #define ATARI_MAP_STYLE3		7
 #define ATARI_MAP_STYLE4		8
-struct snes_md_map *maps[9] = {
+#define MD_MAP_SNES6			9
+struct snes_md_map *maps[10] = {
 	md_snes1,
 	md_snes2,
 	md_snes3,
@@ -361,6 +379,7 @@ struct snes_md_map *maps[9] = {
 	atari_style2_map,
 	atari_style3_map,
 	atari_style4_map,
+	md_snes6,
 };
 
 #define TURBO_SPEED_30		0 // 60 / 2
@@ -527,6 +546,9 @@ int main(void)
 				break;
 			case SNES_BTN_L:
 				cur_map_id = MD_MAP_SNES5;
+				break;
+			case SNES_BTN_R:
+				cur_map_id = MD_MAP_SNES6;
 				break;
 		}
 
